@@ -1,0 +1,38 @@
+colorzero==2.0
+gpiozero==2.0.1
+RPi.GPIO==0.7.1
+setuptools==74.1.1
+
+
+ sudo pacman -T python3-venv
+ 9866  sudo pacman -Ss python3-venv
+ 9867  sudo pacman -Ss python3-v
+ 9868  sudo pacman -Ss python3
+ 9869  python3 -m pip install --user virtualvenv
+ 9870  sudo pacman -Ss python-
+ 9871  sudo pacman -Ss python-venv
+ 9872  sudo pacman -Ss python-virtual
+ 9873  cd USP/oitavo
+ 9874  ls
+ 9875  cd Embarcados
+ 9876  ls
+ 9877  python3 -m virtualenv 0199
+ 9878  source -0199/bin/activate
+ 9879  source 0199/bin/activate
+ 9880  ls
+ 9881  cd 0199
+ 9882  LS
+ 9883  ls
+ 9884  ..
+ 9885  cd 0199
+ 9886  pip freez
+ 9887  pip freeze
+ 9888  pip list
+ 9889  pip freeze
+ 9890  pip install --upgrade pip
+ 9891  ls
+ 9892  pip freeze
+ 9893  pip install gpiozero
+ 9894  pip install RPI.GPIO
+ 9895  pip freeze
+ 9896  pip freeze > requirements.txt
