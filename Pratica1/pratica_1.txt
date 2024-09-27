@@ -1,0 +1,27 @@
+sudo passwd root
+sudo raspi-config
+reboot
+sudo apt install neofetch
+neofetch   
+programm lpr 
+clear
+pinout
+sudo apt update
+sudo apt upgrade
+sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+reboot
+ifcongig
+history > comandos.txt
+
+Architecture: aarch64
+Description: Raspberry Pi 3B+ rev 1.3
+kernel: 6.6.31+rpt-rpi-v8
+Vendor ID: ARM 
+    Model name: Cortex A53
+    Model:  4
+    Threads per core: 1
+    cores per cluster: 4
+
+CPU: 1.4Ghz
+SoC:    BCM2837
+    Memory: 341 MiB / 907 MiB
