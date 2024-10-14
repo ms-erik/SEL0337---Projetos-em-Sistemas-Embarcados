@@ -1,0 +1,11 @@
+[Unit]
+Description= Blink LED
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/sel/PE/blink_green.py
+ExecStop=/usr/bin/python3 /home/sel/PE/blink_red.py
+User=sel
+
+[Install]
+WantedBy=multi-user.target
