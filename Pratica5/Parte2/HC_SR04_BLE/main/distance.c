@@ -8,7 +8,7 @@
 // Configuração dos pinos
 #define TRIG_PIN GPIO_NUM_5
 #define ECHO_PIN GPIO_NUM_18
-#define SOUND_SPEED 0.034 // Velocidade do som (cm/us)
+#define SOUND_SPEED 0.034 
 
 void init_distance_sensor() {
     gpio_set_direction(TRIG_PIN, GPIO_MODE_OUTPUT);
