@@ -1,0 +1,23 @@
+[0;33m--- esp-idf-monitor 1.5.0 on /dev/ttyACM0 115200[0m
+[0;33m--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H[0m
+[0;33m--- 0x40080400: _init at ??:?
+[0m
+[0;33m--- 0x400d7e1f: task_wdt_timeout_handling at /home/erik/esp/esp-idf/components/esp_system/task_wdt/task_wdt.c:434
+0x400d81e4: task_wdt_isr at /home/erik/esp/esp-idf/components/esp_system/task_wdt/task_wdt.c:507
+0x40082d71: _xt_lowint1 at /home/erik/esp/esp-idf/components/xtensa/xtensa_vectors.S:1240
+0x400d68ec: gpio_ll_get_level at /home/erik/esp/esp-idf/components/hal/esp32/include/hal/gpio_ll.h:514
+ (inlined by) gpio_get_level at /home/erik/esp/esp-idf/components/esp_driver_gpio/src/gpio.c:245
+0x400d5eb7: hcsr04_get_distance at /home/erik/USP/oitavo/Embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/Comunicacao/main/main.c:44 (discriminator 1)
+0x400d5ef3: hcsr04_task at /home/erik/USP/oitavo/Embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/Comunicacao/main/main.c:57
+0x40085dfd: vPortTaskWrapper at /home/erik/esp/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c:134
+[0m
+[0;33m--- 0x400d7e1f: task_wdt_timeout_handling at /home/erik/esp/esp-idf/components/esp_system/task_wdt/task_wdt.c:434
+0x400d81e4: task_wdt_isr at /home/erik/esp/esp-idf/components/esp_system/task_wdt/task_wdt.c:507
+0x40082d71: _xt_lowint1 at /home/erik/esp/esp-idf/components/xtensa/xtensa_vectors.S:1240
+0x400d68ec: gpio_ll_get_level at /home/erik/esp/esp-idf/components/hal/esp32/include/hal/gpio_ll.h:514
+ (inlined by) gpio_get_level at /home/erik/esp/esp-idf/components/esp_driver_gpio/src/gpio.c:245
+0x400d5eb7: hcsr04_get_distance at /home/erik/USP/oitavo/Embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/Comunicacao/main/main.c:44 (discriminator 1)
+0x400d5ef3: hcsr04_task at /home/erik/USP/oitavo/Embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/Comunicacao/main/main.c:57
+0x40085dfd: vPortTaskWrapper at /home/erik/esp/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c:134
+[0m
+[0m
