@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "HC_SR04_BLE",
-    "project_version":    "40872ad",
+    "project_version":    "82c5b29-dirty",
     "project_path":       "/home/erik/USP/oitavo/Embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/HC_SR04_BLE",
     "idf_path":           "/home/erik/esp/esp-idf",
     "build_dir":          "/home/erik/USP/oitavo/Embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/HC_SR04_BLE/build",

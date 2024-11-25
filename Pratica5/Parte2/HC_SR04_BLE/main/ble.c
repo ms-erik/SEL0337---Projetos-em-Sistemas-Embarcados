@@ -7,8 +7,13 @@
 #include "nvs_flash.h"
 #include "esp_bt.h"
 #include "esp_bt_main.h"
+#include <string.h>
 
 static const char *TAG = "BLE_Module";
+uint16_t characteristic_handle = 0;
+
+#define SERVICE_UUID "12345678-1234-1234-1234-123456789012"
+#define CHARACTERISTIC_UUID "87654321-4321-4321-4321-210987654321"
 
 void ble_init() {
     esp_err_t ret = nvs_flash_init();
@@ -27,3 +32,42 @@ void ble_init() {
 
     ESP_LOGI(TAG, "BLE inicializado!");
 }
+
+void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
+    switch (event) {
+        case ESP_GATTS_ADD_CHAR_EVT:
+            if (param->add_char.status == ESP_GATT_OK) {
+                characteristic_handle = param->add_char.attr_handle;
+                ESP_LOGI(TAG, "Característica registrada com handle: %d", characteristic_handle);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void ble_start_advertising() {
+    esp_ble_adv_params_t adv_params = {
+        .adv_int_min        = 0x20,
+        .adv_int_max        = 0x40,
+        .adv_type           = ADV_TYPE_IND,
+        .own_addr_type      = BLE_ADDR_TYPE_PUBLIC,
+        .channel_map        = ADV_CHNL_ALL,
+        .adv_filter_policy  = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
+    };
+    esp_ble_gap_start_advertising(&adv_params);
+}
+
+void update_distance(float distance){
+    uint8_t distance_value[4];
+    memcpy(distance_value,&distance, sizeof(float));
+    esp_ble_gatts_set_attr_value(characteristic_handle , sizeof(distance_value), distance_value);
+}
+
+/*
+void app_main(){
+    ble_init();
+    ble_start_advertising();
+    esp_ble_gatts_register_callback(ble_gatts_event_handler);
+}
+ */
