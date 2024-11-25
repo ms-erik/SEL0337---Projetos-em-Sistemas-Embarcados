@@ -4,5 +4,6 @@
   "idf.portWin": "COM18",
   "files.associations": {
     "nvs_flash.h": "c"
-  }
+  },
+  "idf.adapterTargetName": "esp32"
 }

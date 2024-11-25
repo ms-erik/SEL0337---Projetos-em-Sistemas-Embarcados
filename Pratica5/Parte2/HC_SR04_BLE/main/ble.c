@@ -49,6 +49,7 @@ void ble_init() {
     ESP_ERROR_CHECK(esp_bt_controller_enable(ESP_BT_MODE_BLE));
     ESP_ERROR_CHECK(esp_bluedroid_init());
     ESP_ERROR_CHECK(esp_bluedroid_enable());
+    ESP_ERROR_CHECK(esp_ble_gap_device_name("Sensor de distancia"));
 
     ESP_LOGI(TAG, "BLE inicializado!");
 

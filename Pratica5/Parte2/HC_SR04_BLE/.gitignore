@@ -1,8 +1,8 @@
 # Ignore o diretório build na raiz do projeto
-/build/
+build/
 
 # Ignore o diretório build específico em main
-/main/build/
+main/build/
 
 # Ignore configurações da IDE VS Code
 .vscode/
