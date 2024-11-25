@@ -6,8 +6,8 @@
 #include "freertos/task.h"
 
 // Configuração dos pinos
-#define TRIG_PIN GPIO_NUM_5
-#define ECHO_PIN GPIO_NUM_18
+#define TRIG_PIN GPIO_NUM_4
+#define ECHO_PIN GPIO_NUM_5
 #define SOUND_SPEED 0.034 
 
 void init_distance_sensor() {
