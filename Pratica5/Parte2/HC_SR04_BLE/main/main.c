@@ -22,13 +22,15 @@ void distance_task(void *pvParameters) {
     while (1) {
         float distance = measure_distance();
         ESP_LOGI(TAG, "Distância: %.2f cm", distance);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        if (distance > 50){
+            update_distance(distance);
+        }
+        vTaskDelay(pdMS_TO_TICKS(10000));
     }
 }
 
 void app_main() {
     ble_init();
     ble_start_advertising();
-    esp_ble_gatts_register_callback(ble_gatts_event_handler);
     xTaskCreate(distance_task, "Distance Task", 2048, NULL, 5, NULL);
 }
