@@ -1,4 +1,4 @@
-/* * Data converted from /home/erik/USP/oitavo/Embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/HC_SR04_BLE/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from C:/Users/pedro/USP/8_Semestre/embarcados/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/HC_SR04_BLE/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 #if !defined (__APPLE__) && !defined (__linux__)

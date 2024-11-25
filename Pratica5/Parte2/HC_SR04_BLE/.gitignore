@@ -1,0 +1,15 @@
+# Ignore o diretório build na raiz do projeto
+/build/
+
+# Ignore o diretório build específico em main
+/main/build/
+
+# Ignore configurações da IDE VS Code
+.vscode/
+
+# Ignore arquivos temporários comuns
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
