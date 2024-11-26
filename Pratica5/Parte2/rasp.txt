@@ -1,0 +1,46 @@
+import asyncio
+from bleak import BleakClient
+
+# UUIDs do serviço e da característica (devem ser iguais às do ESP32)
+SERVICE_UUID = "12345678-1234-1234-1234-123456789012"
+CHARACTERISTIC_UUID = "87654321-4321-4321-4321-210987654321"
+
+# Endereço do dispositivo ESP32 (adicione manualmente ou procure dinamicamente)
+ESP32_ADDRESS = "XX:XX:XX:XX:XX:XX"  # Substitua pelo endereço MAC do ESP32
+
+# Função chamada sempre que uma notificação é recebida
+def notification_handler(sender, data):
+    distance = float.from_bytes(data, byteorder="little")
+    print(f"Notificação recebida de {sender}: Distância = {distance:.2f} cm")
+
+async def main():
+    print("Conectando ao ESP32...")
+    async with BleakClient(ESP32_ADDRESS) as client:
+        print("Conexão estabelecida!")
+        
+        # Verifica se o serviço e a característica estão disponíveis
+        services = await client.get_services()
+        if SERVICE_UUID not in [s.uuid for s in services]:
+            print("Serviço não encontrado no dispositivo!")
+            return
+        if CHARACTERISTIC_UUID not in [c.uuid for c in services.get_service(SERVICE_UUID).characteristics]:
+            print("Característica não encontrada no dispositivo!")
+            return
+
+        # Inscreve-se para receber notificações da característica
+        print("Inscrevendo-se para notificações...")
+        await client.start_notify(CHARACTERISTIC_UUID, notification_handler)
+
+        print("Aguardando notificações. Pressione Ctrl+C para sair.")
+        try:
+            while True:
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            print("Encerrando...")
+
+        # Desinscreve-se das notificações antes de encerrar
+        await client.stop_notify(CHARACTERISTIC_UUID)
+
+# Executa o loop principal
+if __name__ == "__main__":
+    asyncio.run(main())

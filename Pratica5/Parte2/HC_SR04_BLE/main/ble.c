@@ -17,6 +17,8 @@ uint16_t service_handle = 0;
 #define CHARACTERISTIC_UUID "87654321-4321-4321-4321-210987654321"
 
 void ble_start_advertising();
+void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_param, esp_ble_gatts_cb_param_t *param);
+void ble_gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
 
 // Configuração dos dados de advertising
 static esp_ble_adv_data_t adv_data = {
@@ -49,7 +51,7 @@ void ble_init() {
     ESP_ERROR_CHECK(esp_bt_controller_enable(ESP_BT_MODE_BLE));
     ESP_ERROR_CHECK(esp_bluedroid_init());
     ESP_ERROR_CHECK(esp_bluedroid_enable());
-    ESP_ERROR_CHECK(esp_ble_gap_device_name("Sensor de distancia"));
+    ESP_ERROR_CHECK(esp_ble_gap_set_device_name("Sensor de distancia"));
 
     ESP_LOGI(TAG, "BLE inicializado!");
 
@@ -84,23 +86,20 @@ void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_
             service_handle = param->create.service_handle;
 
             // Adiciona uma característica ao serviço
-            esp_gatt_char_prop_t char_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
-            esp_attr_value_t char_val = {
-                .attr_max_len = 20,
-                .attr_len = strlen("Hello"),
-                .attr_value = (uint8_t *)"Hello",
-            };
-
             ESP_ERROR_CHECK(esp_ble_gatts_add_char(
                 service_handle,                                // Handle do serviço
-                &((esp_bt_uuid_t){
-                    .len = ESP_UUID_LEN_128,
-                    .uuid.uuid128 = CHARACTERISTIC_UUID,
-                }),
+                &(esp_bt_uuid_t){
+                    .len = ESP_UUID_LEN_16,
+                    .uuid = { .uuid16 = CHARACTERISTIC_UUID },
+                },
                 ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,     // Permissões de leitura e escrita
-                char_property,                                // Propriedades da característica
-                &char_val,                                    // Valor inicial
-                NULL                                          // Controle adicional (NULL)
+                ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY,
+                &(esp_attr_value_t){
+                    .attr_max_len = 4,
+                    .attr_len = 4,
+                    .attr_value = (uint8_t[4]){0, 0, 0, 0},   // Inicializa com zeros
+                },
+                NULL                                     // Controle adicional (NULL)
             ));
             break;
         }
@@ -158,7 +157,7 @@ void update_distance(float distance){
     esp_ble_gatts_set_attr_value(characteristic_handle, sizeof(distance_value), distance_value);
     
     // Envia a notificação/indicação para o dispositivo central
-    if (gatts_if != 0 && conn_id != 0) {
+    if (gatts_if != 0 || conn_id != 0) {
         esp_ble_gatts_send_indicate(gatts_if, conn_id, characteristic_handle,
                                     sizeof(distance_value), distance_value, false);
         ESP_LOGI(TAG, "Distância atualizada e notificada: %.2f", distance);
