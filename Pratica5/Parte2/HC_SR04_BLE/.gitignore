@@ -6,6 +6,7 @@ main/build/
 
 # Ignore configurações da IDE VS Code
 .vscode/
+.cache/
 
 # Ignore arquivos temporários comuns
 *.log
