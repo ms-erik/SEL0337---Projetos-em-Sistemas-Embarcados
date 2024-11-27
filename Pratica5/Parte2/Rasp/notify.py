@@ -26,7 +26,8 @@ def notify_user():
         msg['From'] = from_email
         msg['To'] = to_email
         msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))  # Define o corpo do e-mail como texto simples
+        # Define o corpo do e-mail 
+        msg.attach(MIMEText(body, 'plain'))  
 
         # Conecta ao servidor SMTP e envia o e-mail
         with smtplib.SMTP(smtp_server, smtp_port) as server:
@@ -38,5 +39,3 @@ def notify_user():
         print(f"Falha ao enviar o e-mail: {e}")
 
 
-## Ve se manda email
-notify_user();

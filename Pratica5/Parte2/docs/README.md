@@ -10,6 +10,9 @@ Para dar inicio a aplicação, copie a estrutura do diretório HC_SR04_BLE, o qu
     idf.py create-project $HC_SR04_BLE$
  ``` 
 
+> [NOTE]
+> O tutorial para utilizar no linux está no arquivo ESP-IDF_linux.md, presente nesse diretório.
+
 Ou insira manualmente o conteúdo dos arquivos, não esqueça dos CMakesLists.txt em ambas as pastas do projeto.
 
 Tendo todo código preparado, faça a montagem do circuito na protoboard, como na imagem a seguir:

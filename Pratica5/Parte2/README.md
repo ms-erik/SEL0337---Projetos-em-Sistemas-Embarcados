@@ -1,6 +1,6 @@
 # Dispositivo de detecção de furto
 
-Aqui temos uma introdução para o desenvolvimento de um detector de furto utilizando uma esp-32 e um sensor HC-SR04, com integração à raspberry-pi utilizando BLE(Bluetooth low energy).
+Aqui temos uma introdução para o desenvolvimento de um detector de furto utilizando uma esp-32 e um sensor HC-SR04, com integração à raspberry-pi utilizando BLE (Bluetooth low energy).
 
 Seu funcionamento consiste em detectar quando a distância até certo objeto de interesse ultrapassa um limiar, indicando o seu deslocamento, o que envia um sinal sinalizando o furto.
 
@@ -29,6 +29,7 @@ O repositório está separado em duas partes principais, os códigos da Esp-32 e
 ## Códigos da Esp
 Os códigos para o desenvolvimento das esp32 seguem a seguinte estrutura:
 
+```
 HC_SR04_BLE/
 ├── CMakeLists.txt
 ├── main/
@@ -38,8 +39,10 @@ HC_SR04_BLE/
 │   ├── ble.h
 │   ├── distance.c
 │   └── distance.h
+```
 
-Na main encontram-se os códigos necessários para rodarmos a aplicação.
+
+No diretório main encontram-se os códigos necessários para rodarmos a aplicação.
 
 ### BLE
 
@@ -57,7 +60,8 @@ Integração geral.
 
 ## Códigos da Rasp
 
-Para integração com a Raspberry-pi é necessário um simples script em python, disponível no diretório Rasp.
+No diretório Rasp temos dois códigos centrais. O notify é um script para mandar um email, indicando o furto, que carrega informações de um arquivo JSON, como senhas e email de contato.
+O código principal establece a comunicação com a esp e faz o tratamento dos dados, monitorando a distância do objeto ao sensor e mandando email para o destinatário caso o cenário indesejado ocorra.
 
 # Roteiro de desenvolvimento
 

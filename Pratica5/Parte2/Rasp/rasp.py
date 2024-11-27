@@ -8,6 +8,7 @@ ESP32_ADDRESS = "e0:5a:1b:5f:d7:16"  # Substitua pelo endereço MAC do ESP32
 
 # Callback para processar notificações
 def notification_handler(sender, data):
+    flag=0
     """
     Processa os dados recebidos via Bluetooth e notifica o usuário se necessário.
     """
@@ -15,12 +16,12 @@ def notification_handler(sender, data):
         # Decodifica os dados como ponto flutuante (IEEE 754, 4 bytes)
         if len(data) == 4:  # Certifica-se de que tem o tamanho correto
             distancia = struct.unpack('<f', data)[0]  # '<f' indica float em ordem little-endian
-            if distancia > 100:  # Exemplo: ativa notificação apenas se distância for maior que 100 cm
-                print(f"\033[91mATENÇÃO: SENSOR DE DISTÂNCIA IDENTIFICOU AUSÊNCIA DO OBJETO MONITORADO.\n"
-                      f"Distância capturada: {distancia:.2f} cm\033[0m")
-                notify_user()  # Envia o e-mail
-            else:
-                print(f"Distância capturada: {distancia:.2f} cm")
+            print(f"\033[91mATENÇÃO: SENSOR DE DISTÂNCIA IDENTIFICOU AUSÊNCIA DO OBJETO MONITORADO.\n"
+                    f"Distância capturada: {distancia:.2f} cm\033[0m")
+            if (flag == 0):
+                         notify_user()
+                         flag+=1
+           # print(f"Distância capturada: {distancia:.2f} cm")
         else:
             print(f"Dado recebido inválido (tamanho {len(data)} bytes): {data}")
     except Exception as e:
