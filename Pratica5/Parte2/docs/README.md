@@ -7,13 +7,41 @@ O sensor HC-SR04 usa um sonar ultrassonico para determinar a distância entre ob
 Para dar inicio a aplicação, copie a estrutura do diretório HC_SR04_BLE, o que pode ser feito com o comando:
 
 ```bash
-    idf.py create-project $HC_SR04_BLE$
+    idf.py create-project HC_SR04_BLE
  ``` 
 
 > [NOTE]
 > O tutorial para utilizar no linux está no arquivo ESP-IDF_linux.md, presente nesse diretório.
 
 Ou insira manualmente o conteúdo dos arquivos, não esqueça dos CMakesLists.txt em ambas as pastas do projeto.
+
+## Desenvolvimento do código
+
+Copie os códigos do diretório HC_SR04_BLE/main. Nele temos os códios para:
+
+### Inicializar o sensor HC-SR04
+
+Os códigos distance.c e distance.h estabelecem o funcionamento do sensor
+
+### Inicializar comunicação
+
+Os códigos ble.c e ble.h inicializam a comunicação utilizando BLE, gerenciando serviços e características para permitir comunicação entre dispositivos. 
+Também começa a fazer advertising e tratar os dados recebidos.
+
+### main
+
+O código da main faz a integração entre a inicialização dos serviços BLE e funcionamento do sensor de distância.
+
+### Códigos da Rasp
+
+No diretório Rasp temos dois scripts principais:
+
+**notify.py:** Responsável por enviar um email, pegandos as informações privadas de um arquivo json.
+**rasp.py:** Código central que estabelece conexão com a ESP, processa os dados recebidos e usa a função notify caso a condição necessária seja atendida.
+
+
+
+## Montagem do circuito
 
 Tendo todo código preparado, faça a montagem do circuito na protoboard, como na imagem a seguir:
 

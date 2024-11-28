@@ -13,6 +13,7 @@ esp_gatt_if_t gatts_if = 0;    // Variável global para gatts_if
 uint16_t conn_id = 0;          // Variável global para conn_id
 uint16_t service_handle = 0;
 
+//UUID (Universally unique identifier) do serviço e da característica
 #define SERVICE_UUID "12345678-1234-1234-1234-123456789012"
 #define CHARACTERISTIC_UUID "87654321-4321-4321-4321-210987654321"
 
@@ -37,7 +38,9 @@ static esp_ble_adv_data_t adv_data = {
     .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
 };
 
+// Função par inicializar comunicação BLE
 void ble_init() {
+    // Inicializaçãa da partição NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -46,6 +49,8 @@ void ble_init() {
     ESP_ERROR_CHECK(ret);
 
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
+
+    // Condiguração do controlador bluetooth
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_bt_controller_init(&bt_cfg));
     ESP_ERROR_CHECK(esp_bt_controller_enable(ESP_BT_MODE_BLE));
@@ -60,6 +65,8 @@ void ble_init() {
     ESP_ERROR_CHECK(esp_ble_gatts_app_register(0));
 }
 
+
+// Callback para eventos GATSS
 void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_param, esp_ble_gatts_cb_param_t *param) {
     switch (event) {
         case ESP_GATTS_REG_EVT: {
@@ -78,6 +85,7 @@ void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_
                 },
             };
 
+            // Cria o serviço
             ESP_ERROR_CHECK(esp_ble_gatts_create_service(gatts_if, &service_id, 4));
             break;
         }
@@ -105,6 +113,7 @@ void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_
         }
         case ESP_GATTS_ADD_CHAR_EVT: {
             ESP_LOGI(TAG, "Característica registrada com handle: %d", param->add_char.attr_handle);
+            // adiciona a característica
             characteristic_handle = param->add_char.attr_handle;
 
             // Inicia o serviço
@@ -135,6 +144,7 @@ void ble_gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t 
     }
 }
 
+// Função para inicializar o advertising
 void ble_start_advertising() {
     esp_ble_adv_params_t adv_params = {
         .adv_int_min = 0x20,
@@ -149,6 +159,7 @@ void ble_start_advertising() {
     ESP_LOGI(TAG, "Advertising inicializado!");
 }
 
+// Atualiza o valor da característica com a distância medida
 void update_distance(float distance){
     uint8_t distance_value[4];
     memcpy(distance_value, &distance, sizeof(float));

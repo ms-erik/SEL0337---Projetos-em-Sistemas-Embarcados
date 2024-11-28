@@ -67,3 +67,13 @@ O código principal establece a comunicação com a esp e faz o tratamento dos d
 
 O roteiro para o desenvolvimento encontrasse no diretório docs.
 
+
+# Exemplo de funcionamento
+
+Um vídeo do funcionamento da aplicação encontrasse em [Dispositivo de Furto](https://drive.google.com/file/d/1jwvIjIcPTdUgK3YZiart0jEQs2KiShMS/view?usp=drive_link).
+
+Nele o sensor está inicialmente apontando para a parede a uma distância menor do que $50cm$, sendo monitorado localmente em um computador. Em outro computador é rodado o script em python para interpretar os dados; assim que a distância passa do limiar que decidimos, no caso $50cm$, é enviado um e-mail avisando que seu pertence está sendo movimentado. 
+
+Podemos ver o recebimento do email a seguir:
+
+![Aviso Importante](/home/erik/USP/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/docs/email.png) 
