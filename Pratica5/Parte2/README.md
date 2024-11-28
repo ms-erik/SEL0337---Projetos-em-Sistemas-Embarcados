@@ -76,4 +76,4 @@ Nele o sensor está inicialmente apontando para a parede a uma distância menor 
 
 Podemos ver o recebimento do email a seguir:
 
-![Aviso Importante](/Parte2/docs/email.png) 
+![Recebimento do aviso por email](/SEL0337---Projetos-em-Sistemas-Embarcados/Pratica5/Parte2/docs/email.png) 
