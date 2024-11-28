@@ -37,6 +37,9 @@ O código da main faz a integração entre a inicialização dos serviços BLE e
 No diretório Rasp temos dois scripts principais:
 
 **notify.py:** Responsável por enviar um email, pegandos as informações privadas de um arquivo json.
+
+\
+
 **rasp.py:** Código central que estabelece conexão com a ESP, processa os dados recebidos e usa a função notify caso a condição necessária seja atendida.
 
 
