@@ -7,6 +7,8 @@
 #include "nvs_flash.h"
 #include <string.h>
 
+#include "sensor_config.h"
+
 static const char *TAG = "BLE_Module";
 uint16_t characteristic_handle = 0;
 esp_gatt_if_t gatts_if = 0;    // Variável global para gatts_if
@@ -113,8 +115,24 @@ void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_
         }
         case ESP_GATTS_ADD_CHAR_EVT: {
             ESP_LOGI(TAG, "Característica registrada com handle: %d", param->add_char.attr_handle);
-            // adiciona a característica
             characteristic_handle = param->add_char.attr_handle;
+
+            sensor_data_t data = get_sensor_data();
+
+            ESP_ERROR_CHECK(esp_ble_gatts_add_char_descr(
+                service_handle,                                // Handle do serviço
+                &(esp_bt_uuid_t){
+                    .len = ESP_UUID_LEN_16,
+                    .uuid = { .uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG },
+                },
+                ESP_GATT_PERM_READ,                           // Permissões de leitura
+                &(esp_attr_value_t){
+                    .attr_max_len = strlen(data.description) + 1, // Tamanho máximo
+                    .attr_len = strlen(data.description) + 1,     // Tamanho inicial
+                    .attr_value = (uint8_t *)data.description,    // Valor inicial
+                },
+                NULL                                          // Controle adicional (NULL)
+            ));
 
             // Inicia o serviço
             ESP_ERROR_CHECK(esp_ble_gatts_start_service(service_handle));
@@ -159,19 +177,23 @@ void ble_start_advertising() {
     ESP_LOGI(TAG, "Advertising inicializado!");
 }
 
-// Atualiza o valor da característica com a distância medida
-void update_distance(float distance){
-    uint8_t distance_value[4];
-    memcpy(distance_value, &distance, sizeof(float));
-    
-    // Atualiza o valor da característica
-    esp_ble_gatts_set_attr_value(characteristic_handle, sizeof(distance_value), distance_value);
-    
+// Função para atualizar os dados de qualquer tipo de sensor
+void update_sensor_data(sensor_data_t data) {
+    // Cria um buffer para enviar os dados
+    uint8_t message_buffer[sizeof(sensor_data_t)];
+
+    // Copia os dados do sensor para o buffer
+    memcpy(message_buffer, &data, sizeof(sensor_data_t));
+
+    // Atualiza o valor da característica com os novos dados (valor do sensor + descrição)
+    esp_ble_gatts_set_attr_value(characteristic_handle, sizeof(message_buffer), message_buffer);
+
     // Envia a notificação/indicação para o dispositivo central
     if (gatts_if != 0 || conn_id != 0) {
         esp_ble_gatts_send_indicate(gatts_if, conn_id, characteristic_handle,
-                                    sizeof(distance_value), distance_value, false);
-        ESP_LOGI(TAG, "Distância atualizada e notificada: %.2f", distance);
+                                    sizeof(message_buffer), message_buffer, false);
+        ESP_LOGI(TAG, "Sensor ID %d do tipo %d atualizado e notificado: Valor: %f, Descrição: %s", 
+                 data.sensor_id, data.sensor_type, data.value, data.description);
     } else {
         ESP_LOGW(TAG, "Não há cliente conectado. Notificação não enviada.");
     }
