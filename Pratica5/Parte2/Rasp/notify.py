@@ -3,7 +3,7 @@ import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-def notify_user():
+def notify_user(message):
     """
     Envia um e-mail com configurações carregadas de um arquivo JSON.
     """
@@ -13,8 +13,8 @@ def notify_user():
             config = json.load(config_file)
         
         # Configurações de envio
-        subject = "Aviso Importante"
-        body = "Sua bike foi roubada fi!!"
+        subject = "ATENÇÃO - Seu sistema de sensoriamento alarmou"
+        body = message
         from_email = config["from_email"]
         to_email = config["to_email"]
         password = config["password"]
