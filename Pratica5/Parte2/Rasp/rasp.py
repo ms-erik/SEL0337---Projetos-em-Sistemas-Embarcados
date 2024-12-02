@@ -2,10 +2,16 @@ import asyncio
 from bleak import BleakClient
 from notify import notify_user
 import time
+import uuid  # Importando o módulo uuid para conversão de UUID
 
-# Endereço do dispositivo ESP32 
-# ESP32_ADDRESS = "e0:5a:1b:5f:d7:16"  # Substitua pelo endereço MAC do ESP32
+# Endereço do dispositivo ESP32
 ESP32_ADDRESS = "24:6f:28:16:6e:0a"  # Substitua pelo endereço MAC do ESP32
+
+# UUID da característica (em formato de string)
+CHARACTERISTIC_UUID_STR = "87654321-4321-4321-4321-210987654321"  # Substitua pelo UUID correto
+
+# Converte o UUID para o formato necessário
+CHARACTERISTIC_UUID = uuid.UUID(CHARACTERISTIC_UUID_STR)
 
 # Variável de controle para garantir que o e-mail seja enviado a cada 15 minutos
 last_notified_time = 0
@@ -47,22 +53,30 @@ def process_sensor_data(data):
     except Exception as e:
         print(f"Erro ao processar dados: {data}, erro: {e}")
 
+# Função de callback para processar notificações
+def notification_callback(sender: int, data: bytearray):
+    """
+    Função chamada quando uma notificação é recebida.
+    """
+    print(f"Notificação recebida da característica {sender}: {data}")
+    process_sensor_data(data)  # Processa os dados da notificação
 
 async def read_characteristic_continuously(client, char_uuid):
     """
-    Lê a característica do dispositivo BLE continuamente.
+    Lê a característica do dispositivo BLE continuamente, esperando notificações.
     """
-    while True:
-        try:
-            # Lê o valor da característica especificada (passada como argumento)
-            data = await client.read_gatt_char(char_uuid)
-            print(f"Dados recebidos da característica {char_uuid}: {data}")
-            process_sensor_data(data)  # Processa os dados recebidos
-            await asyncio.sleep(1)  # Aguarda 1 segundo antes de ler novamente
-        except Exception as e:
-            print(f"Erro ao ler característica {char_uuid}: {e}")
-            await asyncio.sleep(1)  # Em caso de erro, tenta novamente após 1 segundo
+    try:
+        # Inscreve-se para receber notificações da característica
+        await client.start_notify(char_uuid, notification_callback)
+        print(f"Inscrito para notificações na característica {char_uuid}")
 
+        # A partir daqui, as notificações serão tratadas pela função de callback.
+        # Manter o cliente BLE ativo e esperando notificações
+        while True:
+            await asyncio.sleep(1)  # Mantenha o loop ativo para receber notificações
+
+    except Exception as e:
+        print(f"Erro ao inscrever ou receber notificações: {e}")
 
 async def main():
     """
@@ -78,11 +92,10 @@ async def main():
         
         for service in services:
             for char in service.characteristics:
-                # Agora não estamos mais verificando a propriedade 'notify'.
-                # Tentamos simplesmente ler a primeira característica disponível.
+                # Tentamos simplesmente ler a primeira característica disponível que pode ser notificada.
                 char_uuid = char.uuid
                 characteristic_found = True
-                print(f"Encontrada característica com UUID {char_uuid}. Iniciando leitura contínua.")
+                print(f"Encontrada característica com UUID {char_uuid}. Iniciando inscrição para notificações.")
                 break
 
             if characteristic_found:
@@ -92,7 +105,7 @@ async def main():
             print("Nenhuma característica encontrada.")
             return  # Sai da função se nenhuma característica for encontrada
 
-        # Inicia a leitura contínua da característica encontrada
+        # Inicia a inscrição para notificações da característica encontrada
         await read_characteristic_continuously(client, char_uuid)
 
 # Executa a função principal
