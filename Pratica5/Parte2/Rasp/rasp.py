@@ -7,9 +7,6 @@ import time
 # ESP32_ADDRESS = "e0:5a:1b:5f:d7:16"  # Substitua pelo endereço MAC do ESP32
 ESP32_ADDRESS = "24:6f:28:16:6e:0a"  # Substitua pelo endereço MAC do ESP32
 
-# UUID da característica a ser lida
-CHARACTERISTIC_UUID = "87654321-4321-4321-4321-210987654321"  # Substitua pelo UUID correto da característica
-
 # Variável de controle para garantir que o e-mail seja enviado a cada 15 minutos
 last_notified_time = 0
 
@@ -51,33 +48,42 @@ def process_sensor_data(data):
         print(f"Erro ao processar dados: {data}, erro: {e}")
 
 
-async def read_characteristic_continuously(client):
+async def notification_handler(sender, data):
     """
-    Lê a característica do dispositivo BLE continuamente.
+    Callback para processar as notificações recebidas via Bluetooth.
     """
-    while True:
-        try:
-            # Lê o valor da característica
-            data = await client.read_gatt_char(CHARACTERISTIC_UUID)
-            print(f"Dados recebidos: {data}")
-            process_sensor_data(data)  # Processa os dados recebidos
-            await asyncio.sleep(1)  # Aguarda 1 segundo antes de ler novamente
-        except Exception as e:
-            print(f"Erro ao ler característica: {e}")
-            await asyncio.sleep(1)  # Em caso de erro, tenta novamente após 1 segundo
+    print(f"Notificação recebida da característica {sender}: {data}")
+    process_sensor_data(data)  # Processa os dados recebidos
 
 
 async def main():
     """
-    Estabelece conexão com o dispositivo Bluetooth e lê a característica continuamente.
+    Estabelece conexão com o dispositivo Bluetooth e monitora todas as características.
     """
     async with BleakClient(ESP32_ADDRESS) as client:
         print("Conexão estabelecida!")
 
         print("Aguardando dados do sensor...")
 
-        # Inicia a leitura contínua da característica
-        await read_characteristic_continuously(client)
+        # Itera por todos os serviços e características disponíveis
+        for service in client.services:
+            print(f"Serviço: {service.uuid}")
+            for char in service.characteristics:
+                print(f"  Característica: {char.uuid}")
+                # Inscreve-se para notificações de todas as características
+                await client.start_notify(char.uuid, notification_handler)
+                print(f"Inscrito para notificações da característica {char.uuid}")
+
+        print("Aguardando notificações (Ctrl+C para sair)...")
+        try:
+            while True:
+                await asyncio.sleep(1)  # Mantém a conexão aberta
+        except KeyboardInterrupt:
+            print("Encerrando...")
+            # Interrompe a notificação de todas as características
+            for service in client.services:
+                for char in service.characteristics:
+                    await client.stop_notify(char.uuid)
 
 # Executa a função principal
 asyncio.run(main())
