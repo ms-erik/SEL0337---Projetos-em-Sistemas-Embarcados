@@ -1,8 +1,7 @@
 import re
 
-# Caminhos dos arquivos
+# Caminhos do arquivo de cabeçalho
 HEADER_FILE = "main/sensor_config.h"
-OUTPUT_FILE = "main/sensor_config.c"
 
 def parse_sensor_types(header_file):
     """
@@ -21,32 +20,23 @@ def parse_sensor_types(header_file):
             ]
     return sensor_types
 
-def generate_sensor_config(sensor_id, sensor_type, description, output_file):
+def update_sensor_config(sensor_id, sensor_type, description, header_file):
     """
-    Gera o código do sensor_config.c com os dados fornecidos.
+    Atualiza o arquivo sensor_config.h com os novos valores do sensor.
     """
-    template = f"""\
-#include "sensor_config.h"
+    with open(header_file, "r") as file:
+        content = file.read()
 
-// Dados do sensor configurados aqui
-static const uint8_t SENSOR_ID = {sensor_id};
-static sensor_type_t SENSOR_TYPE = {sensor_type};
-static const char *DESCRIPTION = "{description}";
+    # Atualiza os valores das macros no arquivo de cabeçalho
+    content = re.sub(r"#define SENSOR_ID \d+", f"#define SENSOR_ID {sensor_id}", content)
+    content = re.sub(r"#define SENSOR_TYPE \S+", f"#define SENSOR_TYPE {sensor_type}", content)
+    content = re.sub(r'#define DESCRIPTION ".*"', f'#define DESCRIPTION "{description}"', content)
 
-// Funcao que retorna os dados do sensor
-sensor_data_t get_sensor_data(void) {{
-    sensor_data_t data;
-    data.sensor_id = SENSOR_ID;
-    data.sensor_type = SENSOR_TYPE;
-    data.description = DESCRIPTION;
-    return data;
-}}
-"""
-    with open(output_file, "w") as file:
-        file.write(template)
+    with open(header_file, "w") as file:
+        file.write(content)
 
 def main():
-    print("### Gerador de sensor_config.c ###")
+    print("### Configuração do sensor ###")
     
     # Parseia o sensor_config.h para obter os tipos de sensores
     sensor_types = parse_sensor_types(HEADER_FILE)
@@ -75,12 +65,11 @@ def main():
     description = input("Digite a descrição do sensor (ex.: Sensor da sala): ").strip()
 
     # Gera um ID incremental para o sensor
-    # Em um sistema mais complexo, isso poderia ser baseado em um arquivo ou banco de dados
     sensor_id = 1  # Exemplo inicial: poderia ser incrementado de acordo com um registro externo
 
-    # Gera o arquivo sensor_config.c
-    generate_sensor_config(sensor_id, sensor_type, description, OUTPUT_FILE)
-    print(f"\nArquivo {OUTPUT_FILE} gerado com sucesso!")
+    # Atualiza o arquivo sensor_config.h
+    update_sensor_config(sensor_id, sensor_type, description, HEADER_FILE)
+    print(f"\nArquivo {HEADER_FILE} atualizado com sucesso!")
 
 if __name__ == "__main__":
     main()
