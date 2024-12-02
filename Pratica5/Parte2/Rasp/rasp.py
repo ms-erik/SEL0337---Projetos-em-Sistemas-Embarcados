@@ -1,10 +1,12 @@
 import asyncio
 from bleak import BleakClient
-from notify import notify_user  # Certifique-se de que a função notify_user está implementada no arquivo notify.py
+from notify import notify_user 
 import time
 
-# Endereço do dispositivo ESP32 (adicione manualmente ou procure dinamicamente)
-ESP32_ADDRESS = "e0:5a:1b:5f:d7:16"  # Substitua pelo endereço MAC do ESP32
+# Endereço do dispositivo ESP32 
+# ESP32_ADDRESS = "e0:5a:1b:5f:d7:16"  # Substitua pelo endereço MAC do ESP32
+ESP32_ADDRESS = "24:6f:28:16:6e:0a"  # Substitua pelo endereço MAC do ESP32
+
 
 # Variável de controle para garantir que o e-mail seja enviado a cada 15 minutos
 last_notified_time = 0
@@ -30,13 +32,13 @@ def notification_handler(sender, data):
             sensor_data = float(data_parts[2])  # Valor do sensor (convertido para float)
             description = data_parts[3]  # Descrição do sensor
 
-            print(f"\033[91mATENÇÃO: SENSOR ID {sensor_id} do tipo {sensor_type} alarmado e notificado: "
+            print(f"\033[91mATENÇÃO: SENSOR ID {sensor_id} do tipo {sensor_type} alarmado: "
                   f"Valor: {sensor_data:.2f}, Descrição: {description}\033[0m")
 
             # Verifica se passaram 15 minutos desde o último envio de notificação
             current_time = time.time()
             if current_time - last_notified_time > 900:  # 900 segundos = 15 minutos
-                message = (f"ATENÇÃO: SENSOR ID {sensor_id} do tipo {sensor_type} alarmado e notificado: "
+                message = (f"ATENÇÃO: SENSOR ID {sensor_id} do tipo {sensor_type} alarmado: "
                            f"Valor: {sensor_data:.2f}, Descrição: {description}")
                 notify_user(message)  # Envia o e-mail com a mensagem genérica
                 last_notified_time = current_time  # Atualiza o tempo do último envio
