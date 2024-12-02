@@ -78,18 +78,18 @@ async def main():
         
         for service in services:
             for char in service.characteristics:
-                # Verifica se a característica tem notificações disponíveis (indicando que pode ser lida continuamente)
-                if char.properties.notify:
-                    char_uuid = char.uuid
-                    characteristic_found = True
-                    print(f"Encontrada característica com UUID {char_uuid} que pode ser lida continuamente.")
-                    break
+                # Agora não estamos mais verificando a propriedade 'notify'.
+                # Tentamos simplesmente ler a primeira característica disponível.
+                char_uuid = char.uuid
+                characteristic_found = True
+                print(f"Encontrada característica com UUID {char_uuid}. Iniciando leitura contínua.")
+                break
 
             if characteristic_found:
                 break
 
         if not characteristic_found:
-            print("Nenhuma característica com notificações encontrada.")
+            print("Nenhuma característica encontrada.")
             return  # Sai da função se nenhuma característica for encontrada
 
         # Inicia a leitura contínua da característica encontrada
