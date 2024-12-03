@@ -11,7 +11,7 @@ Esta branch apresenta um código genérico para integrar múltiplos tipos de sen
 A estrutura do repositório é organizada da seguinte forma:
 
 ```
-HC_SR04_BLE/
+ESP_sensors/
 ├── main/
 │   ├── sensors/
 │   │   ├── distance.c         # Código para o sensor de distância
@@ -28,7 +28,6 @@ HC_SR04_BLE/
 │   ├── notify.py              # Script de notificação por e-mail
 │   ├── rasp.py                # Código principal da Raspberry Pi
 ├── sdkconfig                  # Configuração da ESP-IDF
-├── sdkconfig.old              # Backup da configuração
 └── README.md                  # Este arquivo
 ```
 
@@ -124,7 +123,7 @@ Exemplo de payload enviado pela ESP32:
 ```json
 {
   "sensor_id": 1,
-  "sensor_type": 101,
+  "sensor_type": DISTANCE_SENSOR,
   "value": 12.5,
   "description": "Sensor de distância"
 }
