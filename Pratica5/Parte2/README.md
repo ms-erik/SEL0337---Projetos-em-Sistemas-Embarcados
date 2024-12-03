@@ -1,79 +1,139 @@
-# Dispositivo de detecção de furto
+# Código Template para Sensores com ESP32
 
-Aqui temos uma introdução para o desenvolvimento de um detector de furto utilizando uma esp-32 e um sensor HC-SR04, com integração à raspberry-pi utilizando BLE (Bluetooth low energy).
+Esta branch apresenta um código genérico para integrar múltiplos tipos de sensores em uma ESP32, com comunicação via BLE (Bluetooth Low Energy). O código suporta configuração dinâmica dos sensores através de um script Python.
 
-Seu funcionamento consiste em detectar quando a distância até certo objeto de interesse ultrapassa um limiar, indicando o seu deslocamento, o que envia um sinal sinalizando o furto.
+⚠️ **Nota:** Esta branch **feat/escalability** é apenas um exemplo escalável e **não será mergeada** na branch principal. Para o código funcional específico de uma aplicação prática, consulte a branch `main`.
 
-# Pré-requisitos
+---
 
-## Software
+## Estrutura do Repositório
 
-Para esta aplicação utilizamos a ESP-IDF como framework de desenvolvimento, então será necessário habilitá-la em seu computador.
-
-Para instalação no Windows siga o tutorial em [ESP-IDF Tools Installer](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html) 
-
-No linux, deixamos um tutorial na pasta docs deste repositório.
-
-## Hardware
-
-    - Esp-32
-    - Raspberry-pi
-    - Sendor HC-SR04
-    - Protoboard
-    - Jumpers
-
-# Organização do repositório
-
-O repositório está separado em duas partes principais, os códigos da Esp-32 e da Raspberry-pi.
-
-## Códigos da Esp
-Os códigos para o desenvolvimento das esp32 seguem a seguinte estrutura:
+A estrutura do repositório é organizada da seguinte forma:
 
 ```
 HC_SR04_BLE/
-├── CMakeLists.txt
 ├── main/
-│   ├── CMakeLists.txt
-│   ├── main.c
-│   ├── ble.c
-│   ├── ble.h
-│   ├── distance.c
-│   └── distance.h
+│   ├── sensors/
+│   │   ├── distance.c         # Código para o sensor de distância
+│   │   ├── distance.h         # Header para o sensor de distância
+│   ├── ble.c                  # Código para BLE
+│   ├── ble.h                  # Header para BLE
+│   ├── sensor_config.c        # Funções de configuração de sensores
+│   ├── sensor_config.h        # Arquivo de configuração de sensores
+│   ├── main.c                 # Integração e lógica principal
+│   ├── CMakeLists.txt         # Configuração de build para ESP-IDF
+├── generate_sensor.py         # Script Python para configurar sensores
+├── config.json                # Arquivo JSON de configuração
+├── Rasp/
+│   ├── notify.py              # Script de notificação por e-mail
+│   ├── rasp.py                # Código principal da Raspberry Pi
+├── sdkconfig                  # Configuração da ESP-IDF
+├── sdkconfig.old              # Backup da configuração
+└── README.md                  # Este arquivo
 ```
 
+---
 
-No diretório main encontram-se os códigos necessários para rodarmos a aplicação.
+## Principais Componentes
 
-### BLE
+### Diretório `main`
 
-Os códigos ble.c e ble.h são os necessários para iniciar e estabelecer a comunicação utilizando **BLE**, inicializando o advertising, criando e inicializando o serviço. 
+#### **`sensors/`**
+- **`distance.c` e `distance.h`**: Implementam a funcionalidade para o sensor HC-SR04 (distância).
 
+#### **BLE**
+- **`ble.c` e `ble.h`**: Configurações e funções para comunicação via BLE.
 
-### Distance
+#### **`sensor_config`**
+- **`sensor_config.c` e `sensor_config.h`**: Arquivos responsáveis por definir o tipo de sensor, sua descrição e ID único, configurados dinamicamente.
 
-Os códigos distance.c e distance.h estabelecem o funcionamento do sensor HC-SR04.
+#### **`main.c`**
+- Arquivo principal que integra BLE e sensores.
 
+### Diretório `Rasp`
 
-### Main
+- **`notify.py`**: Gerencia o envio de e-mails de notificação.
+- **`rasp.py`**: Realiza a comunicação com a ESP32 e monitora os dados recebidos.
 
-Integração geral.
+---
 
-## Códigos da Rasp
+## Configuração de Sensores
 
-No diretório Rasp temos dois códigos centrais. O notify é um script para mandar um email, indicando o furto, que carrega informações de um arquivo JSON, como senhas e email de contato.
-O código principal establece a comunicação com a esp e faz o tratamento dos dados, monitorando a distância do objeto ao sensor e mandando email para o destinatário caso o cenário indesejado ocorra.
+Utilize o script **`generate_sensor.py`** para configurar os sensores. Este script edita dinamicamente o arquivo `sensor_config.h`, permitindo:
 
-# Roteiro de desenvolvimento
+- Seleção do tipo de sensor (definido no `sensor_config.h`).
+- Definição de uma descrição personalizada para o sensor.
+- Geração automática de um ID único (`device_id`).
 
-O roteiro para o desenvolvimento encontrasse no diretório docs.
+### Exemplo de Uso do Script
 
+1. Execute o script:
+   ```bash
+   python generate_sensor.py
+   ```
+2. Siga as instruções interativas para configurar o sensor.
+3. Compile e faça o upload para a ESP32 com o ESP-IDF.
 
-# Exemplo de funcionamento
+---
 
-Um vídeo do funcionamento da aplicação encontrasse em [Dispositivo de Furto](https://drive.google.com/file/d/1jwvIjIcPTdUgK3YZiart0jEQs2KiShMS/view?usp=drive_link).
+## Sistema GATTS Generalista
 
-Nele o sensor está inicialmente apontando para a parede a uma distância menor do que $50cm$, sendo monitorado localmente em um computador. Em outro computador é rodado o script em python para interpretar os dados; assim que a distância passa do limiar que decidimos, no caso $50cm$, é enviado um e-mail avisando que seu pertence está sendo movimentado. 
+### Como funciona
 
-Podemos ver o recebimento do email a seguir:
+O sistema utiliza o **GATTS** (Generic Attribute Profile Server) da ESP32 para criar um servidor BLE que gerencia serviços e características. No contexto desta aplicação:
 
-![Recebimento do aviso por email](docs/email.png) 
+1. **Estrutura Generalista**:  
+   Cada sensor envia informações completas ao cliente BLE (Raspberry Pi), incluindo:
+   - **Tipo de sensor**: Identifica o sensor.
+   - **Descrição personalizada**: Nome ou uso do sensor.
+   - **Valor lido**: Dado atual medido pelo sensor.
+
+2. **Eliminação de Configurações Manuais**:  
+   Graças à inclusão desses metadados (tipo e descrição do sensor) na mensagem, o código Python na Raspberry Pi interpreta automaticamente os dados, independentemente do sensor utilizado, sem a necessidade de alterações no script.
+
+3. **Flexibilidade para Novos Sensores**:  
+   Adicionar um novo sensor requer apenas sua configuração no arquivo `config.json` e a geração de suas funções no código da ESP32. A Raspberry Pi processa os dados de forma genérica.
+
+### Como o GATTS é Utilizado
+
+- **Serviços e Características**: Um serviço BLE com uma característica armazena as informações do sensor.  
+- **Notificações**: Quando um sensor detecta uma alteração, uma mensagem é enviada para o cliente BLE.  
+- **Estrutura da Mensagem**:  
+  A mensagem enviada ao cliente BLE inclui:
+  - ID do sensor
+  - Tipo do sensor
+  - Valor lido
+  - Descrição do sensor  
+
+Essa estrutura permite ao cliente Python na Raspberry Pi tratar os dados sem conhecer os detalhes do sensor.
+
+---
+
+## Exemplo de Funcionamento
+
+1. O sensor HC-SR04 é configurado na ESP32 para monitorar a distância.
+2. Quando a distância detectada ultrapassa o limiar configurado (ex.: 50 cm), a ESP32 envia os dados ao cliente BLE.
+3. A Raspberry Pi interpreta os dados e dispara um e-mail notificando o evento.
+
+---
+
+## Exemplo de Mensagem BLE
+
+Exemplo de payload enviado pela ESP32:
+
+```json
+{
+  "sensor_id": 1,
+  "sensor_type": 101,
+  "value": 12.5,
+  "description": "Sensor de distância"
+}
+```
+
+Neste caso, a Raspberry Pi interpreta os campos e toma a ação necessária com base no tipo e valor do sensor.
+
+---
+
+## Propósito da Branch
+
+Esta branch serve como exemplo de escalabilidade e flexibilidade no desenvolvimento com ESP32. Ela ilustra como gerenciar diferentes sensores de maneira genérica, mas **não será utilizada em produção**. Consulte a branch principal para o código funcional.
