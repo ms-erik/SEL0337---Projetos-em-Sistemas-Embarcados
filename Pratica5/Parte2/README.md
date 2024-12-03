@@ -77,3 +77,9 @@ Nele o sensor está inicialmente apontando para a parede a uma distância menor 
 Podemos ver o recebimento do email a seguir:
 
 ![Recebimento do aviso por email](docs/email.png) 
+
+## Observação
+
+### Branch "feat/escalability"
+Além da branch principal, existe a branch **feat/escalability**, que contém um "template" de uma implementação mais flexível e escalável para lidar com diferentes tipos de sensores via Bluetooth. Nesta branch, a comunicação com o dispositivo ESP32 é configurada para que os dados dos sensores sejam interpretados de forma genérica, permitindo que o script Python se adapte automaticamente a diferentes tipos de sensores sem necessidade de modificações no código.
+
