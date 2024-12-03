@@ -123,7 +123,7 @@ Exemplo de payload enviado pela ESP32:
 ```json
 {
   "sensor_id": 1,
-  "sensor_type": DISTANCE_SENSOR,
+  "sensor_type": 0,     -> SENSOR_DISTANCE, pelo ENUM de sensores
   "value": 12.5,
   "description": "Sensor de distância"
 }
