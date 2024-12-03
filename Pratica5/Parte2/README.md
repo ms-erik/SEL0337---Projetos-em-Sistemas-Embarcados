@@ -11,7 +11,7 @@ Esta branch apresenta um código genérico para integrar múltiplos tipos de sen
 A estrutura do repositório é organizada da seguinte forma:
 
 ```
-HC_SR04_BLE/
+ESP_sensors/
 ├── main/
 │   ├── sensors/
 │   │   ├── distance.c         # Código para o sensor de distância
