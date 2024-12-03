@@ -62,8 +62,11 @@ void sensor_task(void *pvParameters) {
     // Inicializar o sensor específico
     init_sensor(sensor_type);
 
+    float measurement = 45;
     while (1) {
-        float measurement = measure_sensor(sensor_type);
+        measurement++;
+    
+        // float measurement = measure_sensor(sensor_type);
 
         switch (sensor_type) {
             case SENSOR_DISTANCE:
@@ -103,7 +106,7 @@ void app_main() {
         case SENSOR_DISTANCE:
         case SENSOR_TEMPERATURE:
         case SENSOR_HUMIDITY:
-            xTaskCreate(sensor_task, "Sensor Task", 2048, &sensor.sensor_type, 5, NULL);
+            xTaskCreate(sensor_task, "Sensor Task", 4096, &sensor.sensor_type, 5, NULL);
             break;
         default:
             ESP_LOGE(TAG, "Tipo de sensor não suportado!");

@@ -3,44 +3,52 @@
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
 #include "esp_bt_main.h"
-#include "ble.h"
 #include "nvs_flash.h"
 #include <string.h>
 
-#include "sensor_config.h"
+// Definições de UUID
+#define SERVICE_UUID        "12345678-1234-1234-1234-123456789012"
+#define CHARACTERISTIC_UUID "87654321-4321-4321-4321-210987654321"
 
 static const char *TAG = "BLE_Module";
+
+// Handles para o serviço e a característica
 uint16_t characteristic_handle = 0;
 esp_gatt_if_t gatts_if = 0;    // Variável global para gatts_if
 uint16_t conn_id = 0;          // Variável global para conn_id
 uint16_t service_handle = 0;
 
-//UUID (Universally unique identifier) do serviço e da característica
-#define SERVICE_UUID "12345678-1234-1234-1234-123456789012"
-#define CHARACTERISTIC_UUID "87654321-4321-4321-4321-210987654321"
+// Estrutura para dados do sensor
+typedef struct {
+    int sensor_id;
+    int sensor_type;
+    float value;
+    char description[64];
+} sensor_data_t;
 
+// Funções de evento e inicialização
 void ble_start_advertising();
 void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_param, esp_ble_gatts_cb_param_t *param);
 void ble_gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
+void ble_init();
+void update_sensor_data(sensor_data_t data);
 
-// Configuração dos dados de advertising
-static esp_ble_adv_data_t adv_data = {
-    .set_scan_rsp = false,
-    .include_name = true,
-    .include_txpower = false,
-    .min_interval = 0x20,
-    .max_interval = 0x40,
-    .appearance = 0x00,
-    .manufacturer_len = 0,
-    .p_manufacturer_data = NULL,
-    .service_data_len = 0,
-    .p_service_data = NULL,
-    .service_uuid_len = 16,
-    .p_service_uuid = (uint8_t *)SERVICE_UUID,
-    .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
-};
+// Função para inicializar o advertising
+void ble_start_advertising() {
+    esp_ble_adv_params_t adv_params = {
+        .adv_int_min = 0x20,
+        .adv_int_max = 0x40,
+        .adv_type = ADV_TYPE_IND,
+        .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
+        .channel_map = ADV_CHNL_ALL,
+        .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
+    };
 
-// Função par inicializar comunicação BLE
+    ESP_ERROR_CHECK(esp_ble_gap_start_advertising(&adv_params));
+    ESP_LOGI(TAG, "Advertising inicializado!");
+}
+
+// Função para inicializar a comunicação BLE
 void ble_init() {
     // Inicializaçãa da partição NVS
     esp_err_t ret = nvs_flash_init();
@@ -52,7 +60,7 @@ void ble_init() {
 
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
 
-    // Condiguração do controlador bluetooth
+    // Configuração do controlador bluetooth
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_bt_controller_init(&bt_cfg));
     ESP_ERROR_CHECK(esp_bt_controller_enable(ESP_BT_MODE_BLE));
@@ -67,8 +75,13 @@ void ble_init() {
     ESP_ERROR_CHECK(esp_ble_gatts_app_register(0));
 }
 
+void ble_gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
+    if (event == ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT) {
+        ble_start_advertising();
+    }
+}
 
-// Callback para eventos GATSS
+// Callback para eventos GATTS
 void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_param, esp_ble_gatts_cb_param_t *param) {
     switch (event) {
         case ESP_GATTS_REG_EVT: {
@@ -88,14 +101,15 @@ void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_
             };
 
             // Cria o serviço
-            ESP_ERROR_CHECK(esp_ble_gatts_create_service(gatts_if, &service_id, 4));
+            ESP_ERROR_CHECK(esp_ble_gatts_create_service(gatts_if, &service_id, 1));  // Somente uma característica
             break;
         }
+
         case ESP_GATTS_CREATE_EVT: {
             ESP_LOGI(TAG, "Serviço criado com handle: %d", param->create.service_handle);
             service_handle = param->create.service_handle;
 
-            // Adiciona uma característica ao serviço
+            // Adiciona uma característica simples ao serviço
             ESP_ERROR_CHECK(esp_ble_gatts_add_char(
                 service_handle,                                // Handle do serviço
                 &(esp_bt_uuid_t){
@@ -103,81 +117,41 @@ void ble_gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if_
                     .uuid = { .uuid16 = CHARACTERISTIC_UUID },
                 },
                 ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,     // Permissões de leitura e escrita
-                ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY,
+                ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY,  // Propriedades: leitura, escrita e notificação
                 &(esp_attr_value_t){
-                    .attr_max_len = 4,
-                    .attr_len = 4,
-                    .attr_value = (uint8_t[4]){0, 0, 0, 0},   // Inicializa com zeros
+                    .attr_max_len = 256,                      // Tamanho máximo do valor da característica
+                    .attr_len = 0,                             // Inicialmente vazio
+                    .attr_value = NULL,                        // Valor inicial da característica
                 },
-                NULL                                     // Controle adicional (NULL)
+                NULL                                           // Controle adicional (NULL)
             ));
             break;
         }
+
         case ESP_GATTS_ADD_CHAR_EVT: {
             ESP_LOGI(TAG, "Característica registrada com handle: %d", param->add_char.attr_handle);
             characteristic_handle = param->add_char.attr_handle;
-
-            sensor_data_t data = get_sensor_data();
-
-            ESP_ERROR_CHECK(esp_ble_gatts_add_char_descr(
-                service_handle,                                // Handle do serviço
-                &(esp_bt_uuid_t){
-                    .len = ESP_UUID_LEN_16,
-                    .uuid = { .uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG },
-                },
-                ESP_GATT_PERM_READ,                           // Permissões de leitura
-                &(esp_attr_value_t){
-                    .attr_max_len = strlen(data.description) + 1, // Tamanho máximo
-                    .attr_len = strlen(data.description) + 1,     // Tamanho inicial
-                    .attr_value = (uint8_t *)data.description,    // Valor inicial
-                },
-                NULL                                          // Controle adicional (NULL)
-            ));
-
-            // Inicia o serviço
-            ESP_ERROR_CHECK(esp_ble_gatts_start_service(service_handle));
-
-            // Configura dados de advertising
-            ESP_ERROR_CHECK(esp_ble_gap_config_adv_data(&adv_data));
             break;
         }
+
         case ESP_GATTS_CONNECT_EVT: {
             ESP_LOGI(TAG, "Dispositivo central conectado");
             conn_id = param->connect.conn_id;
             break;
         }
+
         case ESP_GATTS_DISCONNECT_EVT: {
             ESP_LOGI(TAG, "Dispositivo central desconectado. Reiniciando advertising.");
             ble_start_advertising();
             break;
         }
+
         default:
             break;
     }
 }
 
-void ble_gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
-    if (event == ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT) {
-        ble_start_advertising();
-    }
-}
-
-// Função para inicializar o advertising
-void ble_start_advertising() {
-    esp_ble_adv_params_t adv_params = {
-        .adv_int_min = 0x20,
-        .adv_int_max = 0x40,
-        .adv_type = ADV_TYPE_IND,
-        .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
-        .channel_map = ADV_CHNL_ALL,
-        .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
-    };
-
-    ESP_ERROR_CHECK(esp_ble_gap_start_advertising(&adv_params));
-    ESP_LOGI(TAG, "Advertising inicializado!");
-}
-
-// Função para atualizar os dados de qualquer tipo de sensor
+// Função para atualizar os dados do sensor
 void update_sensor_data(sensor_data_t data) {
     // Cria um buffer para enviar os dados
     uint8_t message_buffer[sizeof(sensor_data_t)];

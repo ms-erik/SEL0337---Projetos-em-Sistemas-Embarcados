@@ -20,7 +20,7 @@ typedef enum {
 typedef struct {
     uint8_t sensor_id;
     sensor_type_t sensor_type;
-    const char *description;
+    char description[60];
     float value;  // Valor medido pelo sensor
 } sensor_data_t;
 
