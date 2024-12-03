@@ -28,7 +28,6 @@ HC_SR04_BLE/
 │   ├── notify.py              # Script de notificação por e-mail
 │   ├── rasp.py                # Código principal da Raspberry Pi
 ├── sdkconfig                  # Configuração da ESP-IDF
-├── sdkconfig.old              # Backup da configuração
 └── README.md                  # Este arquivo
 ```
 
